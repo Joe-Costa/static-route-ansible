@@ -23,10 +23,20 @@
         dest: /home/admin/
         remote_src: yes
 
+    - name: Make all extracted files executable
+      ansible.builtin.file:
+        path: "/home/admin/{{ item }}"
+        mode: '0755'
+      loop:
+        - static_route.sh
+        - qumulo-static-route.service
+        - static_setup.sh
+        - static_route_cron
+
     - name: Apply the route script
-      ansible.builtin.command: bash /home/admin/static_setup.sh
+      ansible.builtin.shell: ./static_setup.sh
       args:
-        chdir: /home/admin/
+        chdir: /home/admin
 
     - name: Clean up files
       ansible.builtin.file:
