@@ -1,0 +1,40 @@
+---
+- name: Deploy and Run Static Route Setup
+  hosts: nodes
+  become: yes
+  remote_user: admin
+
+  tasks:
+    - name: Copy static_route.tar.gz from local directory to node's /home/admin
+      ansible.builtin.copy:
+        src: static_route.tar.gz
+        dest: /home/admin/static_route.tar.gz
+        mode: '0644'
+
+    - name: Copy static_route.sh from local directory to node's /home/admin
+      ansible.builtin.copy:
+        src: static_route.sh
+        dest: /home/admin/static_route.sh
+        mode: '0644'
+
+    - name: Unpack static_route.tar.gz
+      ansible.builtin.unarchive:
+        src: /home/admin/static_route.tar.gz
+        dest: /home/admin/
+        remote_src: yes
+
+    - name: Apply the route script
+      ansible.builtin.command: bash /home/admin/static_setup.sh
+      args:
+        chdir: /home/admin/
+
+    - name: Clean up files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /home/admin/static_route.tar.gz
+        - /home/admin/static_route_cron
+        - /home/admin/static_route.sh
+        - /home/admin/qumulo-static_route.service
+        - /home/admin/static_setup.sh
